@@ -13,8 +13,8 @@ public class Principal {
             
             // 2. Cria um dado simulado
             DadoClimatico novoDado = new DadoClimatico();
-            novoDado.setTemperatura(28.5);
-            novoDado.setUmidade(55.0);
+            novoDado.setTemperatura(22.5);
+            novoDado.setUmidade(50.0);
             novoDado.setPrecipitacao(false);
             novoDado.setVelocidadeVento(18.2);
             novoDado.setPressaoAtmosferica(1015.0);

@@ -1,20 +1,43 @@
 <!DOCTYPE hibernate-configuration PUBLIC
         "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<!-- A tag principal que empacota todas as configurações do Hibernate -->
 <hibernate-configuration>
+    
+    <!-- O "session-factory" é a fábrica de conexões. Toda a configuração de banco de dados fica aqui dentro. -->
     <session-factory>
+        
+        <!-- Define qual é o "motorista" (driver) que o Java vai usar para conseguir conversar com o SQL Server. -->
         <property name="hibernate.connection.driver_class">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
         
+        <!-- O endereço exato do seu banco de dados:
+             - localhost\SQLEXPRESS: indica que o banco está na sua própria máquina (local), na instância SQLEXPRESS.
+             - databaseName=Estacao: o nome do banco de dados que você criou lá no SQL Server.
+             - encrypt=true;trustServerCertificate=true: regras de segurança exigidas pelas versões mais novas do SQL Server para permitir a conexão. -->
         <property name="hibernate.connection.url">jdbc:sqlserver://localhost\SQLEXPRESS;databaseName=Estacao;encrypt=true;trustServerCertificate=true;</property>
         
+        <!-- O usuário de login do SQL Server ('sa' significa System Administrator, o usuário mestre padrão). -->
         <property name="hibernate.connection.username">sa</property>
+        
+        <!-- A senha do seu banco de dados. -->
         <property name="hibernate.connection.password">senha123</property>
 
+        <!-- O "Sotaque" (Dialect). O Hibernate sabe falar com MySQL, Oracle, etc. 
+             Esta linha avisa: "Traduza meus comandos Java para o SQL específico do SQL Server". -->
         <property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>
+        
+        <!-- Quando true, faz o Hibernate imprimir no console do NetBeans todos os comandos (INSERT, SELECT) que ele está rodando por trás dos panos. Ótimo para achar erros. -->
         <property name="hibernate.show_sql">true</property>
+        
+        <!-- Formata os comandos SQL impressos no console com quebras de linha e recuos, para ficarem fáceis de ler. -->
         <property name="hibernate.format_sql">true</property>
+        
+        <!-- O "update" diz ao Hibernate: "Se a classe DadoClimatico ganhar uma variável nova, vá lá no SQL Server e crie uma coluna nova na tabela automaticamente". -->
         <property name="hibernate.hbm2ddl.auto">update</property>
 
+        <!-- Registra a sua classe de modelo. Sem isso, o Hibernate não sabe que a classe DadoClimatico existe e não vai salvá-la. -->
         <mapping class="com.suaestacao.modelo.DadoClimatico"/>
+        
     </session-factory>
 </hibernate-configuration>
