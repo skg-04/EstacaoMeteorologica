@@ -1,3 +1,4 @@
 com\suaestacao\dao\DadoClimaticoDAO.class
 com\suaestacao\Principal.class
+com\suaestacao\api\ClienteApiClima.class
 com\suaestacao\modelo\DadoClimatico.class

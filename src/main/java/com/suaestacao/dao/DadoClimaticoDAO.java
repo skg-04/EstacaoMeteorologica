@@ -1,66 +1,101 @@
-// Define em qual "pasta" (pacote) esta classe está localizada no seu projeto.
-package com.suaestacao.dao;
 
-// Importa a classe de modelo que representa os dados da estação meteorológica.
+package com.suaestacao.dao; // Define o pacote da camada de acesso ao banco.
+
+// Importa a classe que representa os dados climáticos.
 import com.suaestacao.modelo.DadoClimatico;
-// Importa as classes do Hibernate necessárias para conectar e operar o banco de dados.
+
+// Importa a sessão do Hibernate.
+// Uma Session permite executar operações no banco de dados.
 import org.hibernate.Session;
+
+// Importa a fábrica responsável por criar sessões Hibernate.
 import org.hibernate.SessionFactory;
+
+// Importa os recursos utilizados para controlar transações.
 import org.hibernate.Transaction;
+
+// Importa a configuração necessária para iniciar o Hibernate.
 import org.hibernate.cfg.Configuration;
 
-// DAO significa "Data Access Object" (Objeto de Acesso a Dados). 
-// O objetivo desta classe é exclusivamente conversar com o banco de dados (inserir, buscar, etc).
+// Declara a classe responsável pelo acesso aos dados climáticos.
 public class DadoClimaticoDAO {
-    
-    // O SessionFactory é como se fosse o "motor" do Hibernate.
-    // Ele é pesado e serve para gerenciar e fabricar conexões com o banco de dados.
-    private SessionFactory sessionFactory;
 
-    // Construtor: este bloco de código roda automaticamente toda vez que você usar um "new DadoClimaticoDAO()".
+    // Declara uma variável para armazenar a fábrica de sessões.
+    // private restringe seu acesso à própria classe.
+    // final impede substituir a referência depois da inicialização.
+    private final SessionFactory sessionFactory;
+
+    // Construtor da classe DadoClimaticoDAO.
+    // Será executado quando um novo DAO for criado.
     public DadoClimaticoDAO() {
-        // Lê o seu arquivo "hibernate.cfg.xml" (configure) e inicializa a fábrica de conexões (buildSessionFactory).
-        this.sessionFactory = new Configuration().configure().buildSessionFactory();
-    }
 
-    // Método responsável por receber um objeto "dado" preenchido e salvá-lo no SQL Server.
+        // Cria uma configuração do Hibernate.
+        // configure() carrega o arquivo hibernate.cfg.xml.
+        // buildSessionFactory() cria a fábrica de sessões.
+        // A configuração informa como acessar o banco de dados.
+        this.sessionFactory = new Configuration().configure().buildSessionFactory();
+
+    } // Finaliza o construtor.
+
+    // Método público responsável por salvar dados no banco.
+    // Recebe um objeto DadoClimatico contendo informações da API.
+    // void significa que o método não retorna um valor.
     public void salvar(DadoClimatico dado) {
-        // Abre uma nova "Sessão" de comunicação com o banco (como se abrisse uma porta).
-        Session session = sessionFactory.openSession();
-        
-        // Prepara uma "Transação". 
-        // A transação garante a segurança: ou salva tudo com sucesso, ou desfaz tudo se der erro.
+
+        // Declara uma variável utilizada para controlar a transação.
+        // Inicialmente recebe null porque a transação ainda não começou.
         Transaction transaction = null;
-        
-        try { // "Tente executar este bloco:"
-            
-            // Avisa o banco: "Estou começando uma operação, preste atenção".
+
+        // Abre uma sessão de comunicação com o banco de dados.
+        // try-with-resources fecha automaticamente a sessão ao sair do bloco.
+        try (Session session = sessionFactory.openSession()) {
+
+            // Inicia uma transação no banco de dados.
+            // A transação controla a confirmação ou reversão das alterações.
             transaction = session.beginTransaction();
-            
-            // Pede ao Hibernate para "persistir" (salvar) o objeto 'dado' transformando-o numa linha na tabela.
+
+            // Solicita ao Hibernate que persista o objeto recebido.
+            // O Hibernate prepara a inserção dos dados na tabela.
             session.persist(dado);
-            
-            // "Commit" significa confirmar. Aqui ele efetivamente efetiva e grava os dados no SQL Server.
+
+            // Confirma a transação.
+            // O Hibernate executa as alterações pendentes.
             transaction.commit();
-            
-            // Mostra no console (Output) do NetBeans que a operação deu certo.
-            System.out.println("SUCESSO: Registro inserido no SQL Server!");
-            
-        } catch (Exception e) { // "Se acontecer QUALQUER erro no bloco 'try' acima, capture-o aqui:"
-            
-            // Se a transação já tinha sido iniciada antes do erro acontecer...
-            if (transaction != null) {
-                // "Rollback" desfaz qualquer alteração que tentou ser feita. Evita salvar dados pela metade.
+
+        // Captura erros de execução ocorridos durante a gravação.
+        } catch (RuntimeException e) {
+
+            // Verifica se a transação foi criada.
+            // Também verifica se continua ativa.
+            if (transaction != null && transaction.isActive()) {
+
+                // Desfaz as operações não confirmadas da transação.
+                // Isso ajuda a preservar a consistência do banco.
                 transaction.rollback();
-            }
-            // Repassa o erro (joga ele na tela) para você ver o texto em vermelho no console e descobrir o que falhou.
+
+            } // Finaliza a verificação da transação.
+
+            // Propaga o erro para a classe que chamou o método.
+            // A classe Principal poderá capturar e registrar essa falha.
             throw e;
-            
-        } finally { // "Independente se deu sucesso ou erro, no final faça sempre o seguinte:"
-            
-            // Fecha a conexão com o banco. 
-            // ISSO É OBRIGATÓRIO! Se não fechar, o banco de dados acumula conexões "fantasmas" e trava o sistema.
-            session.close();
-        }
-    }
-}
+
+        } // Finaliza o tratamento de erros.
+
+    } // Finaliza o método salvar().
+
+    // Método responsável por encerrar os recursos do Hibernate.
+    public void fechar() {
+
+        // Verifica se a fábrica de sessões existe.
+        // Também verifica se ela ainda não foi fechada.
+        if (sessionFactory != null && !sessionFactory.isClosed()) {
+
+            // Fecha a fábrica de sessões do Hibernate.
+            // Libera os recursos associados, incluindo o pool de conexões gerenciado.
+            sessionFactory.close();
+
+        } // Finaliza a verificação.
+
+    } // Finaliza o método fechar().
+
+} // Finaliza a classe DadoClimaticoDAO.
