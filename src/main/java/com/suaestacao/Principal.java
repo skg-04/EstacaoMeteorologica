@@ -48,7 +48,7 @@ public class Principal {
 
         // Define o intervalo entre as coletas em segundos.
         // Se houver um terceiro argumento, utiliza esse valor.
-        // Caso contrário, considera o intervalo padrão de 60 segundos.
+        // Caso contrário, considera o intervalo padrão de 10 segundos.
         long intervalo = args.length > 2 ? Long.parseLong(args[2]) : 10;
 
         // Exibe no console uma mensagem informando o início da coleta.
